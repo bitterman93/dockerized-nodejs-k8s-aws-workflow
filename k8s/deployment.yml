@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${IMAGE_NAME}-app
+  namespace: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ${IMAGE_NAME}-app
+  template:
+    metadata:
+      labels:
+        app: ${IMAGE_NAME}-app
+    spec:
+      containers:
+      - name: ${IMAGE_NAME}-app
+        image: "${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${GITHUB_SHA}"
+        ports:
+        - containerPort: 3000
+        resources:
+          limits: 
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
