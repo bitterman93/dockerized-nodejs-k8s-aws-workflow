@@ -1,15 +1,9 @@
 name: CI build and test
 
 on:
-  push:
+  pull_request:
     branches:
-        #- main
-        - initial-commit
-
-#on:
-#  pull_request:
-#    branches:
-#        - main
+       - main
 
 jobs:
   build-test-analyze:

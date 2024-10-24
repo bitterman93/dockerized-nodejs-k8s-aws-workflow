@@ -3,8 +3,7 @@ name: Deploy
 on:
   push:
     branches:
-        #- main
-        - initial-commit
+        - main
 
 jobs:
   deployment:
