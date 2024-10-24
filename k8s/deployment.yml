@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: ${IMAGE_NAME}-app
-        image: "${DOCKER_HUB_USERNAME}/${IMAGE_NAME}-app:${GITHUB_SHA}"
+        image: "${DOCKER_HUB_USERNAME}/${IMAGE_NAME}:${GITHUB_SHA}"
         ports:
         - containerPort: 3000
         resources:
