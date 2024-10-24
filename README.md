@@ -23,7 +23,7 @@ ApiKey = '2f5ae96c-b558-4c7b-a590-a501ae1c3f6c';
 Clone this repo.
 
 ```bash
-git clone https://github.com/brobles39/dockerized-nodejs-k8s-aws-workflow.git
+git clone https://github.com/bitterman93/dockerized-nodejs-k8s-aws-workflow.git
 ```
 
 Install dependencies.
@@ -60,13 +60,13 @@ npm run lint
 The application is already deployed in EKS using github actions as CI/CD tool, this is the endpoint:
 
 ```bash
-http://a3b7299ce12b045fca33e0a5159db376-181428005.us-east-1.elb.amazonaws.com/devops/
+ac4c1a6b9741e49f6808f19a793e34cf-1841327574.us-east-1.elb.amazonaws.com/devops/
 ```
 
 Test the endpoint using the following command:
 
 ```bash
-curl -X POST -H "X-Parse-REST-API-Key: 2f5ae96c-b558-4c7b-a590-a501ae1c3f6c" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.vyvTq2o9gHyfpfrON9keW92PDtvaCSSRMgdXOvGnP9k" -H "Content-Type: application/json" -d "{\"message\": \"This is a test\", \"to\": \"Juan Perez\", \"from\": \"Rita Asturia\", \"timeToLifeSec\": 45}" http://a3b7299ce12b045fca33e0a5159db376-181428005.us-east-1.elb.amazonaws.com/DevOps
+curl -X POST -H "X-Parse-REST-API-Key: 2f5ae96c-b558-4c7b-a590-a501ae1c3f6c" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.vyvTq2o9gHyfpfrON9keW92PDtvaCSSRMgdXOvGnP9k" -H "Content-Type: application/json" -d "{\"message\": \"This is a test\", \"to\": \"Juan Perez\", \"from\": \"Rita Asturia\", \"timeToLifeSec\": 45}" ac4c1a6b9741e49f6808f19a793e34cf-1841327574.us-east-1.elb.amazonaws.com/DevOps
 ```
 
 
@@ -123,4 +123,4 @@ The Service is defined with the name "assessment-app" and a selector that matche
 
 ## License
 
-Copyright © 2023 Brian Robles. All rights reserved.
+Copyright © 2024 Brian Robles. All rights reserved.
