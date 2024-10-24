@@ -3,8 +3,9 @@ name: CI build and test
 on:
   push:
     branches:
+        #- main
         - initial-commit
-
+        
 #on:
 #  pull_request:
 #    branches:

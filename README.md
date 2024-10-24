@@ -75,51 +75,70 @@ curl -X POST -H "X-Parse-REST-API-Key: 2f5ae96c-b558-4c7b-a590-a501ae1c3f6c" -H 
 In the following image, one can see the two pods running, along with the LoadBalancer service, deployment and replicaset. The replicaset displays both the desired and current size of the pods.
 <img src="./inform/resourcescreated.png" alt="Alt text" title="Optional title">
 
-## CI/CD Process
+## CI/CD Process for Dockerized Node.js Kubernetes AWS Workflow
 
-Github actions was used as a CI/CD tool, basically it installs the project dependencies, logs into my personal dockerhub account, builds the application and uploads it to my dockerhub account.
+This project uses GitHub Actions for automating Continuous Integration (CI) and Continuous Deployment (CD) processes. There are two workflows that handle different stages of the pipeline: one for building and testing the application, and another for deploying it to an Amazon EKS cluster.
 
-As variables it has configured a dockerhub token to access the account, as well as the credentials of my personal aws account and the KUBECONFIG_FILE in base64 to point to my EKS cluster.
+**CI Workflow (ci-build-test.yml)**
 
-**Full Pipeline description:**
+This workflow is triggered on pull requests targeting the main branch. Its primary goal is to ensure that all code changes are validated before merging. The workflow performs the following steps:
 
-**1. name:** The name of the pipeline.
+**1. Checkout code:** The source code of the project is checked out from the repository.
 
-**2. on:** The events that trigger the pipeline, which are push events on the main branch and pull request events targeting the main branch.
+**2. Set up Node.js environment:** Node.js is set up using the specified version (18.15.0) to run the project.
 
-**3. jobs:** The list of jobs that the pipeline will execute.
+**3. Install dependencies:** Project dependencies are installed using npm ci for a clean installation.
 
-**4. build-test-analyze:** The name of the job.
+**4. Run unit tests:** The test suite is executed using npm run test to ensure the functionality of the application.
 
-**5. runs-on:** The type of virtual machine that the job will run on. In this case, it's an Ubuntu-based virtual machine.
+**5. Run static code analysis:** Linting is performed using npm run lint to maintain code quality and identify potential issues.
 
-**6. steps:** The list of steps that the job will execute.
+**CD Workflow (deploy-to-production.yml)**
 
-**7. Checkout code:** This step checks out the source code of the application.
+This workflow is triggered on push events to the main branch, and it is responsible for deploying the application to production. The deployment process includes:
 
-**8. Set up Node.js:** This step sets up the Node.js environment by installing the specified Node.js version.
+**1. Checkout code:** The source code of the project is checked out from the repository.
 
-**9. Install dependencies:** This step installs the Node.js dependencies of the application.
+**2. Build Docker image:** The Docker image of the application is built using the latest commit hash **(github.sha)** as the tag to ensure that each image is uniquely identifiable.
 
-**10. Running unit tests:** This step runs the unit tests of the application using the "npm run test" command.
+**3. Login to DockerHub:** The workflow uses GitHub secrets (**DOCKER_HUB_USERNAME** and **DOCKER_HUB_ACCESS_TOKEN**) to securely authenticate with DockerHub.
 
-**11. Running static code analysis test:** This step runs the static code analysis test of the application using the "npm run lint" command.
+**4. Push Docker image:** The Docker image is tagged with the commit SHA and pushed to DockerHub for later use in the Kubernetes deployment.
 
-**12. Build Docker image:** This step builds a Docker image of the application using the "docker build" command and tags it with the name "assessment".
+**5. Configure AWS credentials:** AWS credentials (**AWS_ACCESS_KEY_ID**, **AWS_SECRET_ACCESS_KEY**) are configured via GitHub secrets to allow the workflow to interact with the EKS cluster.
 
-**13. Login to Docker Hub:** This step logs in to Docker Hub using the Docker Hub username and access token that are stored as GitHub secrets.
+**6. Deploy to Amazon EKS:** The Kubernetes deployment and service definitions are applied to the EKS cluster. The **envsubst** command is used to replace placeholders in the Kubernetes YAML files with environment variables, such as the Docker image name and the commit hash. The Kubernetes configuration is provided via a base64-encoded **KUBECONFIG_FILE**, stored securely in GitHub secrets.
 
-**14. Push Docker image:** This step pushes the Docker image to Docker Hub using the "docker tag" and "docker push" commands. The name of the image is prefixed with the Docker Hub username.
+## Key Concepts
 
-**15. Configure AWS Credentials:** This step configures the AWS credentials that are required to deploy the application to Amazon EKS.
+**GitHub Secrets:** Sensitive information like DockerHub credentials, AWS credentials, and the KUBECONFIG_FILE are securely stored as secrets in GitHub. These secrets are used to authenticate and configure deployments without exposing credentials in the repository.
 
-**16. Deploy the app to Amazon EKS:** This step deploys the application to Amazon EKS using the Kubernetes command-line tool (kubectl) and the Kubernetes deployment configuration file (k8s-deployment.yml). The Kubernetes configuration file is modified using the "envsubst" command to replace placeholders with environment variables. The Kubernetes configuration file and the Kubernetes configuration file content are stored as GitHub secrets.
+**GitHub Variables:** Variables such as IMAGE_NAME and AWS_REGION are used to dynamically set values across the workflows, enabling flexibility when managing different environments or Docker image versions.
+
+**Commit SHA (github.sha):** The unique commit SHA is utilized to tag the Docker image. This ensures that each deployment is tied to a specific commit, allowing for easy traceability and rollback if needed.
+
 
 ## Kubenetes configuration
 
-The **k8s-deployment.yml** file defines a Kubernetes Deployment and a Kubernetes Service for the containerized application. The Deployment specifies the number of replicas to be created, a selector for the pods, and a template for the pods which includes a single container named "assessment-app". The container is configured to use the Docker image "brobles39/assessment:latest" and listen on port 3000. The resource limits for the container are also specified in the template.
+The Kubernetes configuration consists of a Deployment and a Service defined in separate YAML files.
 
-The Service is defined with the name "assessment-app" and a selector that matches the Deployment's pod selector. The Service is configured to expose port 80 which forwards to port 3000 on the pods. Additionally, the Service is of type "LoadBalancer", which means that an external load balancer will be created to distribute traffic to the pods.
+### Deployment
+
+The deployment.yml file defines the deployment of the application in the EKS cluster. It specifies:
+
+Replicas: Two replicas of the pod are created to ensure high availability.
+Pod Selector and Labels: The deployment is configured with a selector and labels to match the pods (app: ${IMAGE_NAME}-app), ensuring that the service can correctly route traffic to the pods.
+Container Configuration: The container runs the Docker image built from the latest commit in DockerHub, listening on port 3000. Resource limits and requests are also defined to control memory and CPU usage.
+
+### Service
+
+The service.yml file defines a Kubernetes service that exposes the application to external traffic via an AWS LoadBalancer. It includes:
+
+LoadBalancer Type: The service is of type LoadBalancer, which automatically provisions an external load balancer in AWS to handle incoming traffic.
+Port Configuration: The service listens on port 80 and forwards requests to port 3000 on the application pods.
+Pod Selector: The service uses a selector to match the pods based on the app: ${IMAGE_NAME}-app label, ensuring correct traffic routing.
+
+This setup enables an automated, secure, and scalable deployment process for the Node.js application, leveraging Docker, Kubernetes, and AWS EKS to ensure that the application runs efficiently in production.
 
 ## License
 
