@@ -55,7 +55,7 @@ Static code analysis test
 npm run lint
 ```
 
-## Test the application online (**This section is currently unavailable, the eks cluster was up untill 03/05/2023**)
+## Test the application online
 
 The application is already deployed in EKS using github actions as CI/CD tool, this is the endpoint:
 
