@@ -9,8 +9,8 @@ module.exports = {
       branches: 80, // Minimum threshold for branch coverage
       functions: 65, // Minimum threshold for function coverage
       lines: 80, // Minimum threshold for line coverage
-      statements: 80 // Minimum threshold for statement coverage
-    }
+      statements: 80, // Minimum threshold for statement coverage
+    },
   },
   coverageReporters: ['json', 'lcov', 'text', 'clover'], // Types of coverage reports to generate
 };
